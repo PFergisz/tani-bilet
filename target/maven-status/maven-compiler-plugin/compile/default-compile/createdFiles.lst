@@ -1,0 +1,7 @@
+com\twojprojekt\tanibilet\controller\SmokeController.class
+com\twojprojekt\tanibilet\repository\EventRepository.class
+com\twojprojekt\tanibilet\TaniBiletApplication.class
+com\twojprojekt\tanibilet\controller\EventController.class
+com\twojprojekt\tanibilet\service\EventService.class
+com\twojprojekt\tanibilet\config\SecurityConfig.class
+com\twojprojekt\tanibilet\model\Event.class
