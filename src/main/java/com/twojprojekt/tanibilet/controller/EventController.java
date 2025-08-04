@@ -4,6 +4,7 @@ import com.twojprojekt.tanibilet.model.Event;
 import com.twojprojekt.tanibilet.repository.EventRepository;
 import com.twojprojekt.tanibilet.service.EventService;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -26,6 +27,8 @@ public class EventController {
 //        return service.create(e);
 //    }
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    @ResponseStatus(HttpStatus.CREATED)
     public Event createEvent(@RequestBody Event event) {
         return eventRepository.save(event);
     }

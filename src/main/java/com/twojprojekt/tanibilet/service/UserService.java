@@ -17,7 +17,7 @@ public class UserService {
         this.encoder = encoder;
     }
 
-    public User register(String username, String rawPassword) {
+    public User register(String username, String rawPassword, Set<String> roles) {
         if(repo.existsByUsername(username)) {
             throw new RuntimeException("Username is already in use");
         }
@@ -25,10 +25,16 @@ public class UserService {
         User u = new User();
         u.setUsername(username);
         u.setPassword(encoder.encode(rawPassword));
-        u.setRoles(Set.of("ROLE_USER"));
+        u.setRoles(roles);
         return repo.save(u);
     }
 
+    public User register(String username, String rawPassword) {
+        return register(username, rawPassword, Set.of("ROLE_USER"));
+    }
 
+    public boolean existsByUsername(String username) {
+        return repo.existsByUsername(username);
+    }
 
 }
