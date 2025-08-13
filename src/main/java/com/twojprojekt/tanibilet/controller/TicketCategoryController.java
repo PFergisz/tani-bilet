@@ -4,8 +4,12 @@ import com.twojprojekt.tanibilet.model.Event;
 import com.twojprojekt.tanibilet.model.TicketCategory;
 import com.twojprojekt.tanibilet.repository.EventRepository;
 import com.twojprojekt.tanibilet.repository.TicketCategoryRepository;
+import com.twojprojekt.tanibilet.service.TicketService;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/ticketCategories")
@@ -13,13 +17,16 @@ public class TicketCategoryController {
 
     private final TicketCategoryRepository categoryRepo;
     private final EventRepository eventRepo;
+    private final TicketService ticketService;
 
     public TicketCategoryController(TicketCategoryRepository categoryRepo,
-                                    EventRepository eventRepo) {
+                                    EventRepository eventRepo, TicketService ticketService) {
         this.categoryRepo = categoryRepo;
         this.eventRepo = eventRepo;
+        this.ticketService = ticketService;
     }
 
+    // CREATE
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public TicketCategory createCategory(@RequestBody TicketCategoryRequest request) {
@@ -32,8 +39,47 @@ public class TicketCategoryController {
         category.setPrice(request.getPrice());
         category.setAvailable(request.getAvailable());
 
-        return categoryRepo.save(category);
+        TicketCategory saved =  categoryRepo.save(category);
+
+        ticketService.recalcEventAvailableFromCategories(event.getId());
+
+        return saved;
     }
+
+    // UPDATE
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public TicketCategory updateCategory(@PathVariable Long id, @RequestBody TicketCategoryRequest request) {
+        TicketCategory category = categoryRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Kategoria nie istnieje"));
+
+        category.setName(request.getName());
+        category.setPrice(request.getPrice());
+        category.setAvailable(request.getAvailable());
+
+        TicketCategory saved = categoryRepo.save(category);
+
+        Long eventId = saved.getEvent().getId();
+        ticketService.recalcEventAvailableFromCategories(eventId);
+
+        return saved;
+    }
+
+    // DELETE
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteCategory(@PathVariable Long id){
+        TicketCategory category = categoryRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Kategoria nie istnieje"));
+        Long eventId = category.getEvent().getId();
+
+        categoryRepo.deleteById(id);
+
+        ticketService.recalcEventAvailableFromCategories(eventId);
+    }
+
+
 
     public static class TicketCategoryRequest {
         private Long eventId;

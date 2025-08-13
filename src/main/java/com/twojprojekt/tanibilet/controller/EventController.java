@@ -6,6 +6,7 @@ import com.twojprojekt.tanibilet.service.EventService;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -40,5 +41,12 @@ public class EventController {
     @GetMapping
     public List<Event> getAllEvents() {
         return eventRepository.findAll();
+    }
+
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    @GetMapping("/{id}")
+    public Event getEventById(@PathVariable long id) {
+        return eventRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Event with id " + id + " not found"));
     }
 }

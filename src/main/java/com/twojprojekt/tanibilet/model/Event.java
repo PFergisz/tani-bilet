@@ -18,6 +18,8 @@ public class Event {
     private String location;
 
     private BigDecimal price;
+
+    @Column(nullable = false)
     private Integer available;
 
     public Long getId() {
